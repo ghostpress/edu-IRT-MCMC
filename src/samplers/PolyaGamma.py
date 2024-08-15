@@ -1,5 +1,4 @@
 import torch
-import matplotlib.pyplot as plt
 from tqdm import trange
 
 import pymc as pm

@@ -1,5 +1,4 @@
 import torch
-import matplotlib.pyplot as plt
 from tqdm import trange
 
 torch.manual_seed(0)
@@ -33,7 +32,7 @@ def loga_conditional(a, b, theta, y, sigmasq):
     
     logsum = 0
     for p in range(y.shape[0]):
-        logsum += (a * y[p] * theta[p]) - torch.log(1 + torch.exp(a*theta[p]-b))
+        logsum += (a * y[p] * theta[p]) - torch.log(1 + torch.exp(a*theta[p]+b))
     
     prob = logsum - (torch.pow(a, 2)/(2*sigmasq))
     return prob
@@ -67,7 +66,7 @@ def logb_conditional(b, a, theta, y, sigmasq):
     
     logsum = 0
     for p in range(y.shape[0]):
-        logsum += ((-1.0*b) * y[p]) - torch.log(1 + torch.exp(a*theta[p]-b))  # trying -1.0x to see if samples better
+        logsum += (b * y[p]) - torch.log(1 + torch.exp(a*theta[p]+b))  
     
     prob = logsum - (torch.pow(b, 2)/(2*sigmasq))
     return prob
@@ -101,7 +100,7 @@ def logtheta_conditional(theta, a, b, y, sigmasq):
     
     logsum = 0
     for i in range(a.shape[0]):
-        logsum += (a[i] * y[i] * theta) - torch.log(1 + torch.exp(a[i]*theta - b[i]))
+        logsum += (a[i] * y[i] * theta) - torch.log(1 + torch.exp(a[i]*theta + b[i]))
     
     prob = logsum - (torch.pow(theta, 2)/2*sigmasq)
     return prob
