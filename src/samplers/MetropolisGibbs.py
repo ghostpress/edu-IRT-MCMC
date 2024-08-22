@@ -66,7 +66,7 @@ def logb_conditional(b, a, theta, y, sigmasq):
     
     logsum = 0
     for p in range(y.shape[0]):
-        logsum += (b * y[p]) - torch.log(1 + torch.exp(a*theta[p]+b))  
+        logsum += (y[p] * b) - torch.log(1 + torch.exp(a*theta[p]+b))  
     
     prob = logsum - (torch.pow(b, 2)/(2*sigmasq))
     return prob
@@ -100,7 +100,7 @@ def logtheta_conditional(theta, a, b, y, sigmasq):
     
     logsum = 0
     for i in range(a.shape[0]):
-        logsum += (a[i] * y[i] * theta) - torch.log(1 + torch.exp(a[i]*theta + b[i]))
+        logsum += (y[i] * a[i] * theta) - torch.log(1 + torch.exp(a[i]*theta + b[i]))
     
     prob = logsum - (torch.pow(theta, 2)/2*sigmasq)
     return prob
@@ -128,16 +128,16 @@ def metropolis(prev_sample, sigmasq, avg_acc, full_cond, *full_cond_args):
         The next state of the random walk
     """
     
-    prop = prev_sample + (torch.distributions.Normal(torch.tensor([0.0]), sigmasq)).sample()
+    prop = prev_sample + (torch.distributions.Normal(torch.tensor([0.0]), sigmasq).sample())
     
     # Ensure that values are within range [0,1]
-    if (prop > 1) or (prop < 0):
-        A = 0
-    else:
-        logr = full_cond(prop, *full_cond_args) - full_cond(prev_sample, *full_cond_args)    
-        A = torch.min(torch.tensor([1.0]), torch.exp(logr)) 
-    #logr = full_cond(prop, *full_cond_args) - full_cond(prev_sample, *full_cond_args)    
-    #A = torch.min(torch.tensor([1.0]), torch.exp(logr)) 
+    #if (prop > 1) or (prop < 0):
+    #    A = 0
+    #else:
+    #    logr = full_cond(prop, *full_cond_args) - full_cond(prev_sample, *full_cond_args)    
+    #    A = torch.min(torch.tensor([1.0]), torch.exp(logr)) 
+    logr = full_cond(prop, *full_cond_args) - full_cond(prev_sample, *full_cond_args)    
+    A = torch.min(torch.tensor([1.0]), torch.exp(logr)) 
         
     U = (torch.distributions.Uniform(torch.tensor([0.0]), torch.tensor([1.0]))).sample()
 
@@ -186,14 +186,14 @@ def ada_metropolis(prev_sample, sigmasq, scale, s, avg_acc, full_cond, *full_con
     prop = prev_sample + (torch.exp(scale)*torch.distributions.Normal(torch.tensor([0.0]), sigmasq).sample())
 
     # Ensure that sampled values are within [0,1]
-    if (prop > 1) or (prop < 0):
-        A = 0
-    else:
-        logr = full_cond(prop, *full_cond_args) - full_cond(prev_sample, *full_cond_args)    
-        A = torch.min(torch.tensor([1.0]), torch.exp(logr)) 
+    #if (prop > 1) or (prop < 0):
+    #    A = 0
+    #else:
+    #    logr = full_cond(prop, *full_cond_args) - full_cond(prev_sample, *full_cond_args)    
+    #    A = torch.min(torch.tensor([1.0]), torch.exp(logr)) 
     
-    #logr = full_cond(prop, *full_cond_args) - full_cond(prev_sample, *full_cond_args)    
-    #A = torch.min(torch.tensor([1.0]), torch.exp(logr)) 
+    logr = full_cond(prop, *full_cond_args) - full_cond(prev_sample, *full_cond_args)    
+    A = torch.min(torch.tensor([1.0]), torch.exp(logr)) 
     U = (torch.distributions.Uniform(torch.tensor([0.0]), torch.tensor([1.0]))).sample()
 
     update = None
